@@ -11,12 +11,6 @@ enum strip {
   RGB,        // RGB LEDs
   RGBW        // RGB LEDs with an extra white LED per LED
 };
-
-enum tempsensor {
-  DALLASTEMPERATURE,
-  ANALOGSENSOR
-};
-
 #define CONFIG_STRIP RGB // Choose one of the options from above.
 
 // Pins
@@ -31,10 +25,10 @@ enum tempsensor {
 
 //temperature sensor setup
 #define CONFIG_TEMP_PIN 4
-#define TEMPERATURE_ENABLED false
+#define TEMPERATURE_ENABLED true
 //pushbutton toggle 
 #define CONFIG_BUTTON_PIN 5
-#define CONFIG_BUTTON_ENABLED true
+#define CONFIG_BUTTON_ENABLED false
 
 // WiFi
 #define CONFIG_WIFI_SSID "EOLO - FRITZ!Box PE"

@@ -23,6 +23,7 @@
 
 //temperature sensor 
 float temperature = 0.0f;
+unsigned int milliseconds=0;
 #define MSG_DIM 7
 char buffer_converter[MSG_DIM]; //3 char -10--100
 OneWire oneWire (CONFIG_TEMP_PIN);
@@ -88,6 +89,7 @@ PubSubClient client(espClient);
 
 void setup() {
   sensors.begin();
+  sensors.setWaitForConversion(false); 
   if (rgb) {
     pinMode(CONFIG_PIN_RED, OUTPUT);
     pinMode(CONFIG_PIN_GREEN, OUTPUT);
@@ -413,8 +415,7 @@ void setColor(int inR, int inG, int inB, int inW) {
   }
 }
 
-void loop() {
-  
+void loop() {  
   if (!client.connected()) {
     reconnect();
   }
@@ -567,13 +568,23 @@ int calculateVal(int step, int val, int i) {
 }
 void reportTemperatureDallas()
 {
-  sensors.requestTemperatures();
-  temperature =sensors.getTempCByIndex(0)-1.5;
-  String pubString = String(temperature);
-  pubString.toCharArray(buffer_converter, pubString.length()+1); 
-  client.publish(CONFIG_MQTT_TOPIC_TEMPERATURE, buffer_converter);
-  if(CONFIG_DEBUG)
-    Serial.println(buffer_converter);
+  
+  if((millis()>milliseconds)&&(milliseconds!=0))
+  {
+    temperature =sensors.getTempCByIndex(0)-1.5;
+    String pubString = String(temperature);
+    pubString.toCharArray(buffer_converter, pubString.length()+1); 
+    client.publish(CONFIG_MQTT_TOPIC_TEMPERATURE, buffer_converter);
+    milliseconds=0;
+    if(CONFIG_DEBUG)
+      Serial.println(buffer_converter);
+  }
+  else
+    if(milliseconds==0)
+    {
+       sensors.requestTemperatures();
+       milliseconds=millis()+10000;
+    }
 }
 
 void interrupt_button_pressed()
