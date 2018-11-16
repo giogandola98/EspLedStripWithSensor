@@ -35,19 +35,19 @@ const bool includeWhite = (CONFIG_STRIP == BRIGHTNESS) || (CONFIG_STRIP == RGBW)
 const int BUFFER_SIZE = JSON_OBJECT_SIZE(20);
 
 // Maintained state for reporting to HA
-byte red = 255;
-byte green = 255;
-byte blue = 255;
-byte white = 255;
-byte brightness = 255;
+volatile byte red = 255;
+volatile byte green = 255;
+volatile byte blue = 255;
+volatile byte white = 255;
+volatile byte brightness = 255;
 
 // Real values to write to the LEDs (ex. including brightness and state)
-byte realRed = 0;
-byte realGreen = 0;
-byte realBlue = 0;
-byte realWhite = 0;
+volatile byte realRed = 0;
+volatile byte realGreen = 0;
+volatile byte realBlue = 0;
+volatile byte realWhite = 0;
 
-bool stateOn = false;
+volatile bool stateOn = false;
 // Globals for fade/transitions
 bool startFade = false;
 unsigned long lastLoop = 0;
@@ -95,6 +95,11 @@ void setup() {
   }
   if (includeWhite) {
     pinMode(CONFIG_PIN_WHITE, OUTPUT);
+  }
+  if(CONFIG_BUTTON_ENABLED)
+  {
+    pinMode(CONFIG_BUTTON_PIN,INPUT);
+    attachInterrupt(CONFIG_BUTTON_PIN, interrupt_button_pressed, RISING);
   }
 
   // Set the BUILTIN_LED based on the CONFIG_BUILTIN_LED_MODE
@@ -498,7 +503,7 @@ void loop() {
 }
 
 // From https://www.arduino.cc/en/Tutorial/ColorCrossfader
-/* BELOW THIS LINE IS THE MATH -- YOU SHOULDN'T NEED TO CHANGE THIS FOR THE BASICS
+/* BELOW THIS LINE IS THE MATH -- YOU SHOULDN'T NEED TO change THIS FOR THE BASICS
 *
 * The program works like this:
 * Imagine a crossfade that moves the red LED from 0-10,
@@ -569,4 +574,20 @@ void reportTemperatureDallas()
   client.publish(CONFIG_MQTT_TOPIC_TEMPERATURE, buffer_converter);
   if(CONFIG_DEBUG)
     Serial.println(buffer_converter);
+}
+
+void interrupt_button_pressed()
+{
+  if(stateOn==true)
+  {
+    stateOn=false;
+    setColor(0,0,0,0);
+  }
+  else
+  {
+    stateOn=true;
+    setColor(red,green,blue,white);
+  }
+  sendState();
+  Serial.println("sending state");
 }

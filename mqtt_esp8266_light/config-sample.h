@@ -31,7 +31,10 @@ enum tempsensor {
 
 //temperature sensor setup
 #define CONFIG_TEMP_PIN 4
-#define TEMPERATURE_ENABLED true
+#define TEMPERATURE_ENABLED false
+//pushbutton toggle 
+#define CONFIG_BUTTON_PIN 5
+#define CONFIG_BUTTON_ENABLED true
 
 // WiFi
 #define CONFIG_WIFI_SSID "EOLO - FRITZ!Box PE"
